@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "./pkg/infrastructure/pb";
+
+service AuthService {
+    rpc UserSignUp(SignUpRequest) returns (SignUpResponse);
+    rpc UserOTPVerication(RequestOtpVefification) returns (ResponseOtpVerification);
+    rpc UserLogin(RequestUserLogin) returns (ResponseUserLogin);
+}
+
+message RequestUserLogin{
+    string Email=1;
+    string Password=2;
+}
+message ResponseUserLogin{
+    string AccessToken=1;
+    string RefreshToken=2;
+    string ErrorMessage=3;
+}
+
+
+message RequestOtpVefification{
+    string TempToken=1;
+    string Otp=2;
+
+}
+message ResponseOtpVerification{
+    string AccessToken=1;
+    string RefreshToken=2;
+    string ErrorMessage =3;
+    string Otp=4;
+}
+
+
+message SignUpRequest{
+    string UserName  =1;
+    string Name = 2;
+    string Email =4;
+    string Password = 5;
+    string ConfirmPassword = 6;
+}
+
+message SignUpResponse{
+	string Token  =1;
+    string ErrorMessage =2;
+}
