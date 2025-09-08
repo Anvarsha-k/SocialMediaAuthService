@@ -1,5 +1,7 @@
 package interfaceRepository_authSvc
 
+import "time"
+
 // import requestmodels_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/infrastructure/models/requestmodels"
 
 type IUserRepo interface {
@@ -8,4 +10,8 @@ type IUserRepo interface {
 	CreateUser(name, email, username, password string) error
 
 	GetHashPassAndStatus(email string) (string, string, string, error)
+
+	DeleteRecentOtpRequestsBefore5min() error
+
+	TemporarySavingUserOtp(otp int, email string, expiration time.Time)error
 }

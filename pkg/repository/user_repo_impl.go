@@ -6,6 +6,7 @@ import (
 
 	"errors"
 	"fmt"
+	"time"
 
 	interfaceRepository_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/repository/interface"
 	"gorm.io/gorm"
@@ -57,4 +58,22 @@ func (d *UserRepository) GetHashPassAndStatus(email string) (string, string, str
 		return "", "", "", errors.New("no user exist with this email,signup first")
 	}
 	return hasedPassword, status, userid, nil
+}
+
+func (d *UserRepository) DeleteRecentOtpRequestsBefore5min() error {
+	query := "DELETE FROM otp_infos WHERE expiration < CURRENT_TIMESTAMP - INTERVAL '5 minutes';"
+	err := d.DB.Exec(query).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *UserRepository) TemporarySavingUserOtp(otp int, userEmail string, expiration time.Time) error {
+	query := "INSERT INTO otp_infos (email,otp,expiration) VALUES ($1,$2,$3)"
+	err:=d.DB.Exec(query, userEmail, otp, expiration).Error
+	if err!=nil{
+		return err
+	}
+	return nil
 }
