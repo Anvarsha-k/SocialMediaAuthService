@@ -11,3 +11,9 @@ type UserLoginReq struct {
 	Email    string
 	Password string
 }
+
+type ForgotPasswordData struct{
+	Otp string
+	Password string
+	ConfirmPassword string
+}

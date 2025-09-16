@@ -110,9 +110,18 @@ func (d *UserRepository) GetUserId(email string) (string, error) {
 	query := "SELECT id FROM users WHERE email=$1 AND status=$2"
 	err := d.DB.Raw(query, email, "active").Row().Scan(&userId)
 	if err != nil {
-		fmt.Println("",err)
-		return "",err
+		fmt.Println("", err)
+		return "", err
 	}
-	return userId,nil
+	return userId, nil
 
+}
+
+func (d *UserRepository) UpdateUserPassword(email *string, hashedPassword *string) error {
+	query := "UPDATE users SET password=$1 WHERE email=$2"
+	err := d.DB.Exec(query, *hashedPassword, *email).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

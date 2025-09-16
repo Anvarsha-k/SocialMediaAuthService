@@ -10,4 +10,5 @@ type IUserUseCase interface {
 	UserLogin(*requestmodels_authSvc.UserLoginReq) (responsemodels_authSvc.UserLoginResp, error)
 	VerifyOtp(otp string, TempVerificationToken *string) (responsemodels_authSvc.OtpVerifResult, error)
 	ForgotPasswordRequest(email *string) (*string, error)
+	ResetPassword(userData *requestmodels_authSvc.ForgotPasswordData, TempToken *string)error
 }

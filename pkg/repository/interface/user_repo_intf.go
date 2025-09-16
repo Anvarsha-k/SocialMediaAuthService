@@ -20,4 +20,6 @@ type IUserRepo interface {
 	ChangeUserStatusActive(email string) error
 
 	GetUserId(email string) (string, error)
+
+	UpdateUserPassword(email *string, hashedPass *string)error
 }

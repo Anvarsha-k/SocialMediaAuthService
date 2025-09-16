@@ -200,15 +200,41 @@ func (u *userUseCase) ForgotPasswordRequest(email *string) (*string, error) {
 
 	expiration := time.Now().Add(5 * time.Minute)
 
-	errTempSave:=u.userRepo.TemporarySavingUserOtp(otp,*email,expiration)
-	if errTempSave!=nil{
+	errTempSave := u.userRepo.TemporarySavingUserOtp(otp, *email, expiration)
+	if errTempSave != nil {
 		fmt.Println("Cant save temporary data for otp verification in db")
 		return nil, errors.New("OTP verification down,please try after some time")
 	}
-	tempToken,err:=u.jwtUtil.TempTokenForOtpVerification(u.TokenSecurityKey.TempVerificationKey,*email)
-	if err!=nil{
-		return nil,err
+	tempToken, err := u.jwtUtil.TempTokenForOtpVerification(u.TokenSecurityKey.TempVerificationKey, *email)
+	if err != nil {
+		return nil, err
 	}
-	return &tempToken,nil
+	return &tempToken, nil
 
+}
+
+func (u *userUseCase) ResetPassword(userData *requestmodels_authSvc.ForgotPasswordData, TempVerificationToken *string) error {
+	email, err := u.jwtUtil.UnbindEmailFromClaim(*TempVerificationToken, u.TokenSecurityKey.TempVerificationKey)
+	if err != nil {
+		return err
+	}
+	userOtp, expiration, err := u.userRepo.GetOtpInfo(email)
+	if err != nil {
+		return err
+	}
+	if userData.Otp != userOtp {
+		return errors.New("Invalid OTP!")
+	}
+	if time.Now().After(expiration) {
+		return errors.New("OTP Expired!")
+	}
+	hashedpass, err := u.hashUtils.HashPassword(userData.Password)
+	if err!=nil{
+		return err
+	}
+	err =u.userRepo.UpdateUserPassword(&email,&hashedpass)
+	if err!=nil{
+		return err
+	}
+	return nil
 }

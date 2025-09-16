@@ -9,6 +9,7 @@ service AuthService {
     rpc UserOTPVerication(RequestOtpVefification) returns (ResponseOtpVerification);
     rpc UserLogin(RequestUserLogin) returns (ResponseUserLogin);
     rpc ForgotPasswordRequest(RequestForgotPass) returns (ResponseForgotPass);
+    rpc ResetPassword(RequestResetPass)returns(ResponseResetPass);
 }
 
 message RequestUserLogin{
@@ -54,4 +55,15 @@ message RequestForgotPass{
 message ResponseForgotPass{
     string Token = 1;
     string ErrorMessage = 2;
+}
+
+message RequestResetPass{
+    string Otp = 1;
+    string Password =2;
+    string ConfirmPassword =3;
+    string TempToken= 4;
+}
+message ResponseResetPass{
+    string Token =1;
+    string ErrorMessage =2;
 }

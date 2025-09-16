@@ -97,3 +97,20 @@ func (s *AuthService)ForgotPasswordRequest(ctx context.Context,req *pb.RequestFo
 		Token: *respData,
 	},nil
 }
+
+func (s *AuthService)ResetPassword(ctx context.Context,req *pb.RequestResetPass)(*pb.ResponseResetPass,error) {
+
+	var requestData requestmodels_authSvc.ForgotPasswordData
+
+	requestData.Otp=req.Otp
+	requestData.Password=req.Password
+	requestData.ConfirmPassword=req.ConfirmPassword
+
+	err:=s.userUseCase.ResetPassword(&requestData,&req.TempToken)
+	if err!=nil{
+		return &pb.ResponseResetPass{
+			ErrorMessage: err.Error(),
+		},nil
+	}
+	return &pb.ResponseResetPass{},nil
+}
