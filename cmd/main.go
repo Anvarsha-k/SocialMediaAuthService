@@ -11,6 +11,7 @@ import (
 	"github.com/Anvarsha-k/SocialMediaAuthService/pkg/infrastructure/server"
 	repository_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/repository"
 	usecase_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/usecase"
+	gosmtp_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/go_smtp"
 	hashpassword_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/hash_password"
 	jwttoken_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/jwt.go"
 	randnumgene_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/random_number"
@@ -48,9 +49,10 @@ func main() {
 	jwtUtil := jwttoken_authSvc.NewJwtUtil()
 	randNumUtil:=randnumgene_authSvc.NewRandomNumUtil()
 	sendGrid := sendgrid_authSvc.NewSendGrid(&config.SendGrid)
+	smtp:=gosmtp_authSvc.NewSmtpCredentials(&config.Smtp)
 
 	// Initialize usecase
-	userUseCase := usecase_authSvc.NewUserUseCase(userRepo, hashUtils, jwtUtil, &config.Token, randNumUtil,sendGrid)
+	userUseCase := usecase_authSvc.NewUserUseCase(userRepo, hashUtils, jwtUtil, &config.Token, randNumUtil,sendGrid,smtp)
 
 	//Create GRPC Server
 	grpcServer := grpc.NewServer()

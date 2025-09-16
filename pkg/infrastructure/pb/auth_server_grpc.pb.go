@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_UserSignUp_FullMethodName        = "/auth.AuthService/UserSignUp"
-	AuthService_UserOTPVerication_FullMethodName = "/auth.AuthService/UserOTPVerication"
-	AuthService_UserLogin_FullMethodName         = "/auth.AuthService/UserLogin"
+	AuthService_UserSignUp_FullMethodName            = "/auth.AuthService/UserSignUp"
+	AuthService_UserOTPVerication_FullMethodName     = "/auth.AuthService/UserOTPVerication"
+	AuthService_UserLogin_FullMethodName             = "/auth.AuthService/UserLogin"
+	AuthService_ForgotPasswordRequest_FullMethodName = "/auth.AuthService/ForgotPasswordRequest"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -31,6 +32,7 @@ type AuthServiceClient interface {
 	UserSignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	UserOTPVerication(ctx context.Context, in *RequestOtpVefification, opts ...grpc.CallOption) (*ResponseOtpVerification, error)
 	UserLogin(ctx context.Context, in *RequestUserLogin, opts ...grpc.CallOption) (*ResponseUserLogin, error)
+	ForgotPasswordRequest(ctx context.Context, in *RequestForgotPass, opts ...grpc.CallOption) (*ResponseForgotPass, error)
 }
 
 type authServiceClient struct {
@@ -71,6 +73,16 @@ func (c *authServiceClient) UserLogin(ctx context.Context, in *RequestUserLogin,
 	return out, nil
 }
 
+func (c *authServiceClient) ForgotPasswordRequest(ctx context.Context, in *RequestForgotPass, opts ...grpc.CallOption) (*ResponseForgotPass, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResponseForgotPass)
+	err := c.cc.Invoke(ctx, AuthService_ForgotPasswordRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type AuthServiceServer interface {
 	UserSignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	UserOTPVerication(context.Context, *RequestOtpVefification) (*ResponseOtpVerification, error)
 	UserLogin(context.Context, *RequestUserLogin) (*ResponseUserLogin, error)
+	ForgotPasswordRequest(context.Context, *RequestForgotPass) (*ResponseForgotPass, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedAuthServiceServer) UserOTPVerication(context.Context, *Reques
 }
 func (UnimplementedAuthServiceServer) UserLogin(context.Context, *RequestUserLogin) (*ResponseUserLogin, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserLogin not implemented")
+}
+func (UnimplementedAuthServiceServer) ForgotPasswordRequest(context.Context, *RequestForgotPass) (*ResponseForgotPass, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ForgotPasswordRequest not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -172,6 +188,24 @@ func _AuthService_UserLogin_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_ForgotPasswordRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestForgotPass)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ForgotPasswordRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ForgotPasswordRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ForgotPasswordRequest(ctx, req.(*RequestForgotPass))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserLogin",
 			Handler:    _AuthService_UserLogin_Handler,
+		},
+		{
+			MethodName: "ForgotPasswordRequest",
+			Handler:    _AuthService_ForgotPasswordRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

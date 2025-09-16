@@ -71,9 +71,48 @@ func (d *UserRepository) DeleteRecentOtpRequestsBefore5min() error {
 
 func (d *UserRepository) TemporarySavingUserOtp(otp int, userEmail string, expiration time.Time) error {
 	query := "INSERT INTO otp_infos (email,otp,expiration) VALUES ($1,$2,$3)"
-	err:=d.DB.Exec(query, userEmail, otp, expiration).Error
-	if err!=nil{
+	err := d.DB.Exec(query, userEmail, otp, expiration).Error
+	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (d *UserRepository) GetOtpInfo(email string) (string, time.Time, error) {
+	var expiration time.Time
+
+	type OTPInfo struct {
+		Otp        string    `gorm:"column:otp"`
+		Expiration time.Time `gorm:"column:expiration"`
+	}
+	var otpInfo OTPInfo
+	if err := d.DB.Raw("SELECT otp, expiration FROM otp_infos WHERE email = ? ORDER BY expiration DESC LIMIT 1;", email).Scan(&otpInfo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", expiration, errors.New("otp verification failed, no data found on the user email")
+		}
+		return "", expiration, errors.New("Otp Verification failed, Error finding user data:" + err.Error())
+	}
+	return otpInfo.Otp, otpInfo.Expiration, nil
+}
+
+func (d *UserRepository) ChangeUserStatusActive(email string) error {
+	query := "UPDATE users SET status = 'active' WHERE email = $1"
+	result := d.DB.Exec(query, email)
+	if result.Error != nil {
+		fmt.Println("", result.Error)
+		return result.Error
+	}
+	return nil
+}
+
+func (d *UserRepository) GetUserId(email string) (string, error) {
+	var userId string
+	query := "SELECT id FROM users WHERE email=$1 AND status=$2"
+	err := d.DB.Raw(query, email, "active").Row().Scan(&userId)
+	if err != nil {
+		fmt.Println("",err)
+		return "",err
+	}
+	return userId,nil
+
 }

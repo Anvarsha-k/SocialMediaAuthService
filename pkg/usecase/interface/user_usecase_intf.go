@@ -7,5 +7,7 @@ import (
 
 type IUserUseCase interface {
 	UserSignUp(*requestmodels_authSvc.UserSignUpReq) (*responsemodels_authSvc.UserSignUpResp, error)
-	UserLogin(*requestmodels_authSvc.UserLoginReq) (responsemodels_authSvc.UserLoginResp,error)
+	UserLogin(*requestmodels_authSvc.UserLoginReq) (responsemodels_authSvc.UserLoginResp, error)
+	VerifyOtp(otp string, TempVerificationToken *string) (responsemodels_authSvc.OtpVerifResult, error)
+	ForgotPasswordRequest(email *string) (*string, error)
 }

@@ -1,9 +1,13 @@
 package domain_authSvc
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type OtpInfo struct {
-	ID         uint `gorm:"primaryKey"`
+	gorm.Model
 	Email      string
 	OTP        int
 	Expiration time.Time

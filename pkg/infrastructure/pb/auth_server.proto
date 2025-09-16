@@ -8,6 +8,7 @@ service AuthService {
     rpc UserSignUp(SignUpRequest) returns (SignUpResponse);
     rpc UserOTPVerication(RequestOtpVefification) returns (ResponseOtpVerification);
     rpc UserLogin(RequestUserLogin) returns (ResponseUserLogin);
+    rpc ForgotPasswordRequest(RequestForgotPass) returns (ResponseForgotPass);
 }
 
 message RequestUserLogin{
@@ -45,4 +46,12 @@ message SignUpRequest{
 message SignUpResponse{
 	string Token  =1;
     string ErrorMessage =2;
+}
+
+message RequestForgotPass{
+    string Email = 1;
+}
+message ResponseForgotPass{
+    string Token = 1;
+    string ErrorMessage = 2;
 }

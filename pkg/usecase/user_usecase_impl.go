@@ -10,6 +10,7 @@ import (
 	requestmodels_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/infrastructure/models/requestmodels"
 	responsemodels_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/infrastructure/models/responsemodels"
 	interfaceRepository_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/pkg/repository/interface"
+	interface_smtp_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/go_smtp/interface"
 	interface_hash_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/hash_password/interface"
 	interface_jwt_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/jwt.go/interface"
 	interface_randnumgene_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/random_number/interface"
@@ -25,9 +26,10 @@ type userUseCase struct {
 	TokenSecurityKey *config_authSvc.Token
 	RandNumUtils     interface_randnumgene_authSvc.IRandGene
 	sendGridUtils    interface_sendgrid_authSvc.ISendGrid
+	smtpUtils        interface_smtp_authSvc.ISmtp
 }
 
-func NewUserUseCase(userRepo interfaceRepository_authSvc.IUserRepo, hashUtils interface_hash_authSvc.IhashPassword, jwtUtils interface_jwt_authSvc.IJwt, tokenConfig *config_authSvc.Token, randNumUtils interface_randnumgene_authSvc.IRandGene, sendGridUtil interface_sendgrid_authSvc.ISendGrid) *userUseCase {
+func NewUserUseCase(userRepo interfaceRepository_authSvc.IUserRepo, hashUtils interface_hash_authSvc.IhashPassword, jwtUtils interface_jwt_authSvc.IJwt, tokenConfig *config_authSvc.Token, randNumUtils interface_randnumgene_authSvc.IRandGene, sendGridUtil interface_sendgrid_authSvc.ISendGrid, smtpUtils interface_smtp_authSvc.ISmtp) *userUseCase {
 
 	return &userUseCase{
 		userRepo:         userRepo,
@@ -35,7 +37,9 @@ func NewUserUseCase(userRepo interfaceRepository_authSvc.IUserRepo, hashUtils in
 		jwtUtil:          jwtUtils,
 		TokenSecurityKey: tokenConfig,
 		RandNumUtils:     randNumUtils,
-		sendGridUtils:    sendGridUtil}
+		sendGridUtils:    sendGridUtil,
+		smtpUtils:        smtpUtils,
+	}
 }
 
 func (u *userUseCase) UserSignUp(rq *requestmodels_authSvc.UserSignUpReq) (*responsemodels_authSvc.UserSignUpResp, error) {
@@ -88,8 +92,8 @@ func (u *userUseCase) UserSignUp(rq *requestmodels_authSvc.UserSignUpReq) (*resp
 		fmt.Println("error creating temp token for otp verification")
 		return &resSignup, errors.New("error creating temp token for otp verification")
 	}
-	resSignup.Token=tempToken
-	return &resSignup,nil
+	resSignup.Token = tempToken
+	return &resSignup, nil
 
 	// token := uuid.NewString()
 
@@ -132,4 +136,79 @@ func (u *userUseCase) UserLogin(rq *requestmodels_authSvc.UserLoginReq) (respons
 	resLogin.RefreshToken = refreshToken
 
 	return resLogin, nil
+}
+
+func (u *userUseCase) VerifyOtp(otp string, TempVerificationToken *string) (responsemodels_authSvc.OtpVerifResult, error) {
+	var otpVeriRes responsemodels_authSvc.OtpVerifResult
+	email, unbindErr := u.jwtUtil.UnbindEmailFromClaim(*TempVerificationToken, u.TokenSecurityKey.TempVerificationKey)
+	if unbindErr != nil {
+		return otpVeriRes, unbindErr
+	}
+	userOtp, otpExpire, errGetInfo := u.userRepo.GetOtpInfo(email)
+	if errGetInfo != nil {
+		return otpVeriRes, errGetInfo
+	}
+	if otp != userOtp {
+		return otpVeriRes, errors.New("invalid OTP")
+	}
+	if time.Now().After(otpExpire) {
+		return otpVeriRes, errors.New("OTP Expired")
+	}
+	changeStatErr := u.userRepo.ChangeUserStatusActive(email)
+	if changeStatErr != nil {
+		return otpVeriRes, changeStatErr
+	}
+	UserId, fetchErr := u.userRepo.GetUserId(email)
+	if fetchErr != nil {
+		return otpVeriRes, fetchErr
+	}
+	accessToken, aTokenErr := u.jwtUtil.GenerateAccessToken(u.TokenSecurityKey.UserSecurityKey, UserId)
+	if aTokenErr != nil {
+		return otpVeriRes, aTokenErr
+	}
+	refreshToken, rToekenErr := u.jwtUtil.GenerateRefreshToken(u.TokenSecurityKey.UserSecurityKey)
+	if rToekenErr != nil {
+		return otpVeriRes, rToekenErr
+	}
+	otpVeriRes.AccessToken = accessToken
+	otpVeriRes.RefreshToken = refreshToken
+	otpVeriRes.Otp = "verified"
+
+	return otpVeriRes, nil
+
+}
+func (u *userUseCase) ForgotPasswordRequest(email *string) (*string, error) {
+	_, _, status, err := u.userRepo.GetHashPassAndStatus(*email)
+	if err != nil {
+		return nil, err
+	}
+	if status == "pending" {
+		return nil, errors.New("user status is on pending,OTP not verified")
+	}
+	if status == "blocked" {
+		return nil, errors.New("User is blocked by the Admin")
+	}
+	err = u.userRepo.DeleteRecentOtpRequestsBefore5min()
+	if err != nil {
+		return nil, err
+	}
+	otp := u.RandNumUtils.RandomNumber()
+	err = u.smtpUtils.SendResetPasswordEmailOtp(otp, *email)
+	if err != nil {
+		return nil, err
+	}
+
+	expiration := time.Now().Add(5 * time.Minute)
+
+	errTempSave:=u.userRepo.TemporarySavingUserOtp(otp,*email,expiration)
+	if errTempSave!=nil{
+		fmt.Println("Cant save temporary data for otp verification in db")
+		return nil, errors.New("OTP verification down,please try after some time")
+	}
+	tempToken,err:=u.jwtUtil.TempTokenForOtpVerification(u.TokenSecurityKey.TempVerificationKey,*email)
+	if err!=nil{
+		return nil,err
+	}
+	return &tempToken,nil
+
 }

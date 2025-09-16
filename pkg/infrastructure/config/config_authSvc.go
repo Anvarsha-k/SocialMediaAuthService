@@ -25,16 +25,23 @@ type SendGridConfig struct {
 	SenderEmail string `mapstructure:"SENDGRID_SENDER"`
 }
 
+type Smtp struct{
+	SmtpSender string `mapstructure:"SMTP_SENDER"`
+	SmtpPassword string `mapstructure:"SMTP_APPKEY"`
+	SmtpPort string	`mapstructure:"SMTP_PORT"`
+	SmtpHost string	`mapstructure:"SMTP_HOST"`
+}
+
 type Token struct {
 	UserSecurityKey string `mapstructure:"USER_TOKENKEY"`
 	TempVerificationKey string `mapstructure:"TempVery_TOKENKEY"`
-}
+}	
 
 type Config struct {
 	PortMngr PortManager
 	DB       DataBase
 	Token    Token
-	// Smtp 	 Smtp
+	Smtp 	 Smtp
 	SendGrid      SendGridConfig
 	EmailProvider string `mapstructure:"EMAIL_PROVIDER"` //SENDGRID
 }
@@ -45,6 +52,7 @@ func LoadConfig() (*Config, error) {
 	var token Token
 	// var smtp Smtp
 	var sendgrid SendGridConfig
+	var smtp Smtp
 
 	viper.AddConfigPath(".") //curent path
 	viper.AddConfigPath("..")//parent path
@@ -77,7 +85,11 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = viper.Unmarshal(&smtp)
+	if err !=nil{
+		return nil,err
+	}
 
-	config := Config{PortMngr: portmngr, DB: db, Token: token, SendGrid: sendgrid, EmailProvider: viper.GetString("EMAIL_PROVIDER")}
+	config := Config{PortMngr: portmngr, DB: db, Token: token, SendGrid: sendgrid, EmailProvider: viper.GetString("EMAIL_PROVIDER"),Smtp: smtp}
 	return &config, nil
 }

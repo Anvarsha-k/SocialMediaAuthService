@@ -1,9 +1,14 @@
 package responsemodels_authSvc
 
-type UserSignUpResp struct{
+type UserSignUpResp struct {
 	Token string
 }
-type UserLoginResp struct{
+type UserLoginResp struct {
+	AccessToken  string
+	RefreshToken string
+}
+type OtpVerifResult struct {
+	Otp		string
 	AccessToken string
 	RefreshToken string
 }

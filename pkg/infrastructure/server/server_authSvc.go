@@ -63,11 +63,37 @@ func (s *AuthService) UserLogin(ctx context.Context, req *pb.RequestUserLogin) (
 	if err != nil {
 		return &pb.ResponseUserLogin{
 			ErrorMessage: err.Error(),
-		},nil
+		}, nil
 	}
 	return &pb.ResponseUserLogin{
+		AccessToken:  respData.AccessToken,
+		RefreshToken: respData.RefreshToken,
+	}, nil
+
+}
+
+func (s *AuthService) UserOTPVerication(ctx context.Context, req *pb.RequestOtpVefification) (*pb.ResponseOtpVerification, error) {
+	respData, err := s.userUseCase.VerifyOtp(req.Otp, &req.TempToken)
+	if err != nil {
+		return &pb.ResponseOtpVerification{
+			ErrorMessage: err.Error(),
+		}, nil
+	}
+	return &pb.ResponseOtpVerification{
+		Otp: respData.Otp,
 		AccessToken: respData.AccessToken,
 		RefreshToken: respData.RefreshToken,
 	},nil
+}
 
+func (s *AuthService)ForgotPasswordRequest(ctx context.Context,req *pb.RequestForgotPass)(*pb.ResponseForgotPass, error) {
+	respData,err :=s.userUseCase.ForgotPasswordRequest(&req.Email)
+	if err!=nil{
+		return &pb.ResponseForgotPass{
+			ErrorMessage: err.Error(),
+		},nil
+	}
+	return &pb.ResponseForgotPass{
+		Token: *respData,
+	},nil
 }

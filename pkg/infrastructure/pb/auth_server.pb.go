@@ -381,6 +381,102 @@ func (x *SignUpResponse) GetErrorMessage() string {
 	return ""
 }
 
+type RequestForgotPass struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=Email,proto3" json:"Email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestForgotPass) Reset() {
+	*x = RequestForgotPass{}
+	mi := &file_pkg_infrastructure_pb_auth_server_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestForgotPass) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestForgotPass) ProtoMessage() {}
+
+func (x *RequestForgotPass) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_infrastructure_pb_auth_server_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestForgotPass.ProtoReflect.Descriptor instead.
+func (*RequestForgotPass) Descriptor() ([]byte, []int) {
+	return file_pkg_infrastructure_pb_auth_server_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RequestForgotPass) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type ResponseForgotPass struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=Token,proto3" json:"Token,omitempty"`
+	ErrorMessage  string                 `protobuf:"bytes,2,opt,name=ErrorMessage,proto3" json:"ErrorMessage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResponseForgotPass) Reset() {
+	*x = ResponseForgotPass{}
+	mi := &file_pkg_infrastructure_pb_auth_server_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResponseForgotPass) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResponseForgotPass) ProtoMessage() {}
+
+func (x *ResponseForgotPass) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_infrastructure_pb_auth_server_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResponseForgotPass.ProtoReflect.Descriptor instead.
+func (*ResponseForgotPass) Descriptor() ([]byte, []int) {
+	return file_pkg_infrastructure_pb_auth_server_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ResponseForgotPass) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *ResponseForgotPass) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
 var File_pkg_infrastructure_pb_auth_server_proto protoreflect.FileDescriptor
 
 const file_pkg_infrastructure_pb_auth_server_proto_rawDesc = "" +
@@ -409,12 +505,18 @@ const file_pkg_infrastructure_pb_auth_server_proto_rawDesc = "" +
 	"\x0fConfirmPassword\x18\x06 \x01(\tR\x0fConfirmPassword\"J\n" +
 	"\x0eSignUpResponse\x12\x14\n" +
 	"\x05Token\x18\x01 \x01(\tR\x05Token\x12\"\n" +
-	"\fErrorMessage\x18\x02 \x01(\tR\fErrorMessage2\xd6\x01\n" +
+	"\fErrorMessage\x18\x02 \x01(\tR\fErrorMessage\")\n" +
+	"\x11RequestForgotPass\x12\x14\n" +
+	"\x05Email\x18\x01 \x01(\tR\x05Email\"N\n" +
+	"\x12ResponseForgotPass\x12\x14\n" +
+	"\x05Token\x18\x01 \x01(\tR\x05Token\x12\"\n" +
+	"\fErrorMessage\x18\x02 \x01(\tR\fErrorMessage2\xa2\x02\n" +
 	"\vAuthService\x127\n" +
 	"\n" +
 	"UserSignUp\x12\x13.auth.SignUpRequest\x1a\x14.auth.SignUpResponse\x12P\n" +
 	"\x11UserOTPVerication\x12\x1c.auth.RequestOtpVefification\x1a\x1d.auth.ResponseOtpVerification\x12<\n" +
-	"\tUserLogin\x12\x16.auth.RequestUserLogin\x1a\x17.auth.ResponseUserLoginB\x19Z\x17./pkg/infrastructure/pbb\x06proto3"
+	"\tUserLogin\x12\x16.auth.RequestUserLogin\x1a\x17.auth.ResponseUserLogin\x12J\n" +
+	"\x15ForgotPasswordRequest\x12\x17.auth.RequestForgotPass\x1a\x18.auth.ResponseForgotPassB\x19Z\x17./pkg/infrastructure/pbb\x06proto3"
 
 var (
 	file_pkg_infrastructure_pb_auth_server_proto_rawDescOnce sync.Once
@@ -428,7 +530,7 @@ func file_pkg_infrastructure_pb_auth_server_proto_rawDescGZIP() []byte {
 	return file_pkg_infrastructure_pb_auth_server_proto_rawDescData
 }
 
-var file_pkg_infrastructure_pb_auth_server_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_pkg_infrastructure_pb_auth_server_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_pkg_infrastructure_pb_auth_server_proto_goTypes = []any{
 	(*RequestUserLogin)(nil),        // 0: auth.RequestUserLogin
 	(*ResponseUserLogin)(nil),       // 1: auth.ResponseUserLogin
@@ -436,16 +538,20 @@ var file_pkg_infrastructure_pb_auth_server_proto_goTypes = []any{
 	(*ResponseOtpVerification)(nil), // 3: auth.ResponseOtpVerification
 	(*SignUpRequest)(nil),           // 4: auth.SignUpRequest
 	(*SignUpResponse)(nil),          // 5: auth.SignUpResponse
+	(*RequestForgotPass)(nil),       // 6: auth.RequestForgotPass
+	(*ResponseForgotPass)(nil),      // 7: auth.ResponseForgotPass
 }
 var file_pkg_infrastructure_pb_auth_server_proto_depIdxs = []int32{
 	4, // 0: auth.AuthService.UserSignUp:input_type -> auth.SignUpRequest
 	2, // 1: auth.AuthService.UserOTPVerication:input_type -> auth.RequestOtpVefification
 	0, // 2: auth.AuthService.UserLogin:input_type -> auth.RequestUserLogin
-	5, // 3: auth.AuthService.UserSignUp:output_type -> auth.SignUpResponse
-	3, // 4: auth.AuthService.UserOTPVerication:output_type -> auth.ResponseOtpVerification
-	1, // 5: auth.AuthService.UserLogin:output_type -> auth.ResponseUserLogin
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	6, // 3: auth.AuthService.ForgotPasswordRequest:input_type -> auth.RequestForgotPass
+	5, // 4: auth.AuthService.UserSignUp:output_type -> auth.SignUpResponse
+	3, // 5: auth.AuthService.UserOTPVerication:output_type -> auth.ResponseOtpVerification
+	1, // 6: auth.AuthService.UserLogin:output_type -> auth.ResponseUserLogin
+	7, // 7: auth.AuthService.ForgotPasswordRequest:output_type -> auth.ResponseForgotPass
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -462,7 +568,7 @@ func file_pkg_infrastructure_pb_auth_server_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_infrastructure_pb_auth_server_proto_rawDesc), len(file_pkg_infrastructure_pb_auth_server_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
