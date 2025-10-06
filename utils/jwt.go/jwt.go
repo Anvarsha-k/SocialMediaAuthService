@@ -34,8 +34,8 @@ func (jwtUtil *JwtUtil) GenerateRefreshToken(secretKey string) (string, error) {
 	claims := jwt.MapClaims{
 		"exp": time.Now().Unix() + 604800,
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(secretKey))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)//The signing algorithm (here, HS256 = HMAC with SHA-256)
+	tokenString, err := token.SignedString([]byte(secretKey))// fthis functions convert header,playload to json and then encode both to base64url(eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9) format then combine both,then it takes the comined string(header and payload) and creates signature using secretkey and finally concatinates all.
 	if err != nil {
 		fmt.Println("Error Creating RefreshToken!")
 		return "", err

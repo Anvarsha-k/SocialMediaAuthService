@@ -29,7 +29,7 @@ type userUseCase struct {
 	smtpUtils        interface_smtp_authSvc.ISmtp
 }
 
-func NewUserUseCase(userRepo interfaceRepository_authSvc.IUserRepo, hashUtils interface_hash_authSvc.IhashPassword, jwtUtils interface_jwt_authSvc.IJwt, tokenConfig *config_authSvc.Token, randNumUtils interface_randnumgene_authSvc.IRandGene, sendGridUtil interface_sendgrid_authSvc.ISendGrid, smtpUtils interface_smtp_authSvc.ISmtp) *userUseCase {
+func NewUserUseCase(userRepo interfaceRepository_authSvc.IUserRepo, hashUtils interface_hash_authSvc.IhashPassword, jwtUtils interface_jwt_authSvc.IJwt, tokenConfig *config_authSvc.Token, randNumUtils interface_randnumgene_authSvc.IRandGene, sendGridUtil interface_sendgrid_authSvc.ISendGrid,smtpUtils interface_smtp_authSvc.ISmtp) *userUseCase {
 
 	return &userUseCase{
 		userRepo:         userRepo,

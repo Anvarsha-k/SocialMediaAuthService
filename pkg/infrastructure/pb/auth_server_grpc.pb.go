@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_UserSignUp_FullMethodName            = "/auth.AuthService/UserSignUp"
-	AuthService_UserOTPVerication_FullMethodName     = "/auth.AuthService/UserOTPVerication"
-	AuthService_UserLogin_FullMethodName             = "/auth.AuthService/UserLogin"
-	AuthService_ForgotPasswordRequest_FullMethodName = "/auth.AuthService/ForgotPasswordRequest"
-	AuthService_ResetPassword_FullMethodName         = "/auth.AuthService/ResetPassword"
+	AuthService_UserSignUp_FullMethodName            = "/auth_proto.AuthService/UserSignUp"
+	AuthService_UserOTPVerication_FullMethodName     = "/auth_proto.AuthService/UserOTPVerication"
+	AuthService_UserLogin_FullMethodName             = "/auth_proto.AuthService/UserLogin"
+	AuthService_ForgotPasswordRequest_FullMethodName = "/auth_proto.AuthService/ForgotPasswordRequest"
+	AuthService_ResetPassword_FullMethodName         = "/auth_proto.AuthService/ResetPassword"
+	AuthService_Ping_FullMethodName                  = "/auth_proto.AuthService/Ping"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -34,7 +35,8 @@ type AuthServiceClient interface {
 	UserOTPVerication(ctx context.Context, in *RequestOtpVefification, opts ...grpc.CallOption) (*ResponseOtpVerification, error)
 	UserLogin(ctx context.Context, in *RequestUserLogin, opts ...grpc.CallOption) (*ResponseUserLogin, error)
 	ForgotPasswordRequest(ctx context.Context, in *RequestForgotPass, opts ...grpc.CallOption) (*ResponseForgotPass, error)
-	ResetPassword(ctx context.Context, in *RequestResetPass, opts ...grpc.CallOption) (*ResponseResetPass, error)
+	ResetPassword(ctx context.Context, in *RequestResetPass, opts ...grpc.CallOption) (*ResponseErrorMessage, error)
+	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
 type authServiceClient struct {
@@ -85,10 +87,20 @@ func (c *authServiceClient) ForgotPasswordRequest(ctx context.Context, in *Reque
 	return out, nil
 }
 
-func (c *authServiceClient) ResetPassword(ctx context.Context, in *RequestResetPass, opts ...grpc.CallOption) (*ResponseResetPass, error) {
+func (c *authServiceClient) ResetPassword(ctx context.Context, in *RequestResetPass, opts ...grpc.CallOption) (*ResponseErrorMessage, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResponseResetPass)
+	out := new(ResponseErrorMessage)
 	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PingResponse)
+	err := c.cc.Invoke(ctx, AuthService_Ping_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +115,8 @@ type AuthServiceServer interface {
 	UserOTPVerication(context.Context, *RequestOtpVefification) (*ResponseOtpVerification, error)
 	UserLogin(context.Context, *RequestUserLogin) (*ResponseUserLogin, error)
 	ForgotPasswordRequest(context.Context, *RequestForgotPass) (*ResponseForgotPass, error)
-	ResetPassword(context.Context, *RequestResetPass) (*ResponseResetPass, error)
+	ResetPassword(context.Context, *RequestResetPass) (*ResponseErrorMessage, error)
+	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -126,8 +139,11 @@ func (UnimplementedAuthServiceServer) UserLogin(context.Context, *RequestUserLog
 func (UnimplementedAuthServiceServer) ForgotPasswordRequest(context.Context, *RequestForgotPass) (*ResponseForgotPass, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForgotPasswordRequest not implemented")
 }
-func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *RequestResetPass) (*ResponseResetPass, error) {
+func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *RequestResetPass) (*ResponseErrorMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -240,11 +256,29 @@ func _AuthService_ResetPassword_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).Ping(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_Ping_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).Ping(ctx, req.(*PingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "auth.AuthService",
+	ServiceName: "auth_proto.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -266,6 +300,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetPassword",
 			Handler:    _AuthService_ResetPassword_Handler,
+		},
+		{
+			MethodName: "Ping",
+			Handler:    _AuthService_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

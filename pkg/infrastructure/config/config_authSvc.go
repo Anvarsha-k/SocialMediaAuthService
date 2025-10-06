@@ -1,6 +1,9 @@
 package config_authSvc
 
-import "github.com/spf13/viper"
+import (
+
+	"github.com/spf13/viper"
+)
 
 type PortManager struct {
 	RunnerPort string `mapstructure:"PORTNO"`

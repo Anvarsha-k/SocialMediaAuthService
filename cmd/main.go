@@ -17,6 +17,8 @@ import (
 	randnumgene_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/random_number"
 	sendgrid_authSvc "github.com/Anvarsha-k/SocialMediaAuthService/utils/send_grid"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,7 +34,7 @@ func main() {
 	}
 	fmt.Println("Database connected")
 	// Auto-migrate tables
-	err = db.AutoMigrate(&domain_authSvc.User{},domain_authSvc.OtpInfo{})
+	err = db.AutoMigrate(&domain_authSvc.User{}, domain_authSvc.OtpInfo{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
@@ -47,13 +49,13 @@ func main() {
 	userRepo := repository_authSvc.NewUserRepository(db)
 	hashUtils := hashpassword_authSvc.NewHashUtil()
 	jwtUtil := jwttoken_authSvc.NewJwtUtil()
-	randNumUtil:=randnumgene_authSvc.NewRandomNumUtil()
+	randNumUtil := randnumgene_authSvc.NewRandomNumUtil()
 	sendGrid := sendgrid_authSvc.NewSendGrid(&config.SendGrid)
-	smtp:=gosmtp_authSvc.NewSmtpCredentials(&config.Smtp)
+	smtp := gosmtp_authSvc.NewSmtpCredentials(&config.Smtp)
 
 	// Initialize usecase
-	userUseCase := usecase_authSvc.NewUserUseCase(userRepo, hashUtils, jwtUtil, &config.Token, randNumUtil,sendGrid,smtp)
-
+	// userUseCase := usecase_authSvc.NewUserUseCase(userRepo, hashUtils, jwtUtil, &config.Token, randNumUtil,sendGrid,)
+	userUseCase := usecase_authSvc.NewUserUseCase(userRepo, hashUtils, jwtUtil, &config.Token, randNumUtil, sendGrid, smtp)
 	//Create GRPC Server
 	grpcServer := grpc.NewServer()
 
@@ -62,6 +64,13 @@ func main() {
 
 	// Register the service correctly
 	pb.RegisterAuthServiceServer(grpcServer, authService)
+
+	//Health checkup
+	healthServer := health.NewServer()
+	// Register health service
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthServer)
+	// Set service as healthy
+	healthServer.SetServingStatus("auth_proto.AuthService", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	listener, err := net.Listen("tcp", config.PortMngr.RunnerPort)
 	if err != nil {

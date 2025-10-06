@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package auth;
+package auth_proto;
 
 option go_package = "./pkg/infrastructure/pb";
 
@@ -9,9 +9,13 @@ service AuthService {
     rpc UserOTPVerication(RequestOtpVefification) returns (ResponseOtpVerification);
     rpc UserLogin(RequestUserLogin) returns (ResponseUserLogin);
     rpc ForgotPasswordRequest(RequestForgotPass) returns (ResponseForgotPass);
-    rpc ResetPassword(RequestResetPass)returns(ResponseResetPass);
+    rpc ResetPassword(RequestResetPass)returns(ResponseErrorMessage);
+    rpc Ping (PingRequest) returns (PingResponse);
 }
 
+message ResponseErrorMessage{
+    string ErrorMessage=1;
+}
 message RequestUserLogin{
     string Email=1;
     string Password=2;
@@ -21,8 +25,6 @@ message ResponseUserLogin{
     string RefreshToken=2;
     string ErrorMessage=3;
 }
-
-
 message RequestOtpVefification{
     string TempToken=1;
     string Otp=2;
@@ -39,9 +41,9 @@ message ResponseOtpVerification{
 message SignUpRequest{
     string UserName  =1;
     string Name = 2;
-    string Email =4;
-    string Password = 5;
-    string ConfirmPassword = 6;
+    string Email =3;
+    string Password = 4;
+    string ConfirmPassword = 5;
 }
 
 message SignUpResponse{
@@ -63,7 +65,13 @@ message RequestResetPass{
     string ConfirmPassword =3;
     string TempToken= 4;
 }
-message ResponseResetPass{
-    string Token =1;
-    string ErrorMessage =2;
+//optional
+// message ResponseResetPass{
+//     string Token =1;
+//     string ErrorMessage =2;
+// }
+//
+message PingRequest {}
+message PingResponse {
+  string message = 1;
 }

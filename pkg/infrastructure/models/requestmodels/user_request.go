@@ -12,7 +12,7 @@ type UserLoginReq struct {
 	Password string
 }
 
-type ForgotPasswordData struct{
+type 	ForgotPasswordData struct{
 	Otp string
 	Password string
 	ConfirmPassword string
