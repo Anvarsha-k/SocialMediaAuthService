@@ -223,16 +223,16 @@ func (u *userUseCase) ResetPassword(userData *requestmodels_authSvc.ForgotPasswo
 		return err
 	}
 	if userData.Otp != userOtp {
-		return errors.New("Invalid OTP!")
+		return errors.New("invalid OTP!")
 	}
 	if time.Now().After(expiration) {
-		return errors.New("OTP Expired!")
+		return errors.New("oTP Expired!")
 	}
 	hashedpass, err := u.hashUtils.HashPassword(userData.Password)
 	if err!=nil{
 		return err
 	}
-	err =u.userRepo.UpdateUserPassword(&email,&hashedpass)
+	err =u.userRepo.UpdateUserPassword(email,hashedpass)
 	if err!=nil{
 		return err
 	}

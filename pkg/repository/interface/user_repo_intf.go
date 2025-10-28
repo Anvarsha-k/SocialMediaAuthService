@@ -21,5 +21,5 @@ type IUserRepo interface {
 
 	GetUserId(email string) (string, error)
 
-	UpdateUserPassword(email *string, hashedPass *string)error
+	UpdateUserPassword(email string, hashedPass string)error
 }

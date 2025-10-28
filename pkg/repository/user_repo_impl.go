@@ -117,9 +117,9 @@ func (d *UserRepository) GetUserId(email string) (string, error) {
 
 }
 
-func (d *UserRepository) UpdateUserPassword(email *string, hashedPassword *string) error {
+func (d *UserRepository) UpdateUserPassword(email string, hashedPassword string) error {
 	query := "UPDATE users SET password=$1 WHERE email=$2"
-	err := d.DB.Exec(query, *hashedPassword, *email).Error
+	err := d.DB.Exec(query, hashedPassword, email).Error
 	if err != nil {
 		return err
 	}
